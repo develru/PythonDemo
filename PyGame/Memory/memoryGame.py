@@ -36,6 +36,7 @@ purple = (255, 0, 255)
 cyan = (0, 255, 255)
 
 bgColor = navyBlue
+boxColor = white
 
 donut = "donut"
 square = "square"
@@ -48,13 +49,18 @@ allShapes = (donut, square, diamond, lines, oval)
 assert len(allColors) * len(allShapes) * 2 >= boardWith * boardHeight, \
         "Board is too big for the number of shapes/colors defined."
 
+#fpsClock = None
+#displaySurf = None
+fpsClock = pygame.time.Clock()
+displaySurf = pygame.display.set_mode((windowWidth, windowHeight))
+
 
 def main():
     """ The main function of the game """
-    global fpsClock, displaySurf
+    #global fpsClock, displaySurf
     pygame.init()
-    fpsClock = pygame.time.Clock()
-    displaySurf = pygame.display.set_mode((windowWidth, windowHeight))
+#    fpsClock = pygame.time.Clock()
+#    displaySurf = pygame.display.set_mode((windowWidth, windowHeight))
 
     iMousex = 0
     iMousey = 0
@@ -118,7 +124,7 @@ def generateRevealedBoxesData(isValid):
 
 def startGameAnimation(board):
     """Start the game animation"""
-    coveredBoxes = generateRevealedBoxesData(False)
+    coveredBoxes = generateRevealedBoxesData(True)
     boxes = []
     for x in range(boardWith):
         for y in range(boardHeight):
@@ -134,6 +140,12 @@ def drawBoard(board, revealed):
     for boxX in range(boardWith):
         for boxY in range(boardHeight):
             left, top = leftTopCoordsOfBox(boxX, boxY)
+            if not revealed[boxX][boxY]:
+                pygame.draw.rect(displaySurf, boxColor, (left, top, boxSize,
+                    boxSize))
+            else:
+                shape, color = getShapeAndColor(board, boxX, boxY)
+                drawIcon(shape, color, boxX, boxY)
 
 
 def splitIntoGroupsOf(groupSize, theList):
@@ -148,11 +160,28 @@ def splitIntoGroupsOf(groupSize, theList):
 
 def leftTopCoordsOfBox(boxX, boxY):
     """Convert board coordinates to pixel coordinates"""
-    left = boxX + (boxSize + gapSize) + xMargin
+    left = boxX * (boxSize + gapSize) + xMargin
     top = boxY * (boxSize + gapSize) + yMargin
 
     return (left, top)
 
+
+def getShapeAndColor(board, boxX, boxY):
+    """Shape value for x, y spot"""
+    return board[boxX][boxY][0], board[boxX][boxY][1]
+
+
+def drawIcon(shape, color, boxX, boxY):
+    """Drow the shape"""
+    quarter = int(boxSize * 0.25)
+    half = int(boxSize * 0.5)
+    left, top = leftTopCoordsOfBox(boxX, boxY)
+
+    if shape == donut:
+        pygame.draw.circle(displaySurf, color, (left + half, top + half),
+                half - 5)
+        pygame.draw.circle(displaySurf, bgColor, (left + half, top + half),
+                quarter - 5)
 
 if __name__ == "__main__":
     main()
