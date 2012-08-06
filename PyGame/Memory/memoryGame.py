@@ -15,6 +15,7 @@ from pygame import locals
 windowWidth = 640
 windowHeight = 480
 fps = 30
+revealSpeed = 8
 boxSize = 40
 gapSize = 10
 boardWith = 10
@@ -133,6 +134,8 @@ def startGameAnimation(board):
     boxGroups = splitIntoGroupsOf(8, boxes)
 
     drawBoard(board, coveredBoxes)
+    for boxGroup in boxGroups:
+        revealBoxAnimation(board, boxGroup)
 
 
 def drawBoard(board, revealed):
@@ -182,6 +185,38 @@ def drawIcon(shape, color, boxX, boxY):
                 half - 5)
         pygame.draw.circle(displaySurf, bgColor, (left + half, top + half),
                 quarter - 5)
+    elif shape == square:
+        pygame.draw.rect(displaySurf, color, (left + quarter, top + quarter,
+            boxSize - half, boxSize - half))
+    elif shape == diamond:
+        pygame.draw.polygon(displaySurf, color, ((left + half, top),
+            (left + boxSize - 1, top + half), (left + half, top + boxSize - 1),
+            (left, top + half)))
+    elif shape == lines:
+        for i in range(0, boxSize, 4):
+            pygame.draw.line(displaySurf, color, (left, top + i),
+                    (left +i, top))
+            pygame.draw.line(displaySurf, color, (left + i, top + boxSize - 1),
+                    (left + boxSize - 1, top + i))
+    elif shape == oval:
+        pygame.draw.ellipse(displaySurf, color, (left, top + quarter,
+            boxSize, half))
+
+
+def revealedBoxAnimation(board, boxToReveal):
+    """Do the box reveal animation"""
+    for coverage in range(boxSize, (-revealSpeed) - 1, - revealSpeed):
+        drawBoxCovers(board, boxToReveal, coverage)
+
+
+def drawBoxCovers(board, boxes, coverage):
+    """Draws boxes"""
+    for box in boxes:
+        left, top = leftTopCoordsOfBox(box[0], box[1])
+        pygame.draw.rect(displaySurf, bgColor, (left, top, boxSize, boxSize))
+        shape, color = getShapeAndColor(board, box[0], box[1])
+
+
 
 if __name__ == "__main__":
     main()
